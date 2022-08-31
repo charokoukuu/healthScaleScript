@@ -50,8 +50,7 @@ void setup()
     AE_HX711_Init(ch);
     AE_HX711_Reset(ch);
     sprintf(s, "calibrating %d", ch);
-    Serial.println("a");
-    offset[ch] = AE_HX711_getGram(10, ch);
+    offset[ch] = AE_HX711_getGram(30, ch);
   }
 }
 
