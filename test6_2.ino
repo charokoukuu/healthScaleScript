@@ -5,13 +5,24 @@ void AE_HX711_Reset(char ch);
 long AE_HX711_Read(char ch);
 long AE_HX711_Averaging(char num, char ch);
 float AE_HX711_getGram(char num, char ch);
-float tiltCalc(float *y1, float *y2);
+float tiltCalc(float *M2, float *M5, float *M7, float *M10, float *M12, float *M15, float *M17, float *M20, float *M22, float *M25, float *M27, float *M30, float *M32, float *M35, float *M37);
 
-//ここに5kgを乗せたときの真値を入力する(左から順に1~6)
-float M5[6] = {5.6f, 4.4f, 5.6f, 5.6f, 5.7f, 5.5f};
-
-//ここに20kgを乗せたときの真値を入力する(左から順に1~6)
-float M20[6] = {22.4f, 18.1f, 22.6f, 22.8f, 22.9f, 22.4f};
+//以下に真値を貼り付けてください
+float M2[6] = {2.263f, 1.807f, 2.26f, 2.273f, 2.317f, 2.253f};
+float M5[6] = {5.59f, 4.513f, 5.637f, 5.687f, 5.743f, 5.613f};
+float M7[6] = {7.863f, 6.32f, 7.893f, 7.963f, 8.043f, 7.843f};
+float M10[6] = {11.227f, 9.003f, 11.263f, 11.353f, 11.473f, 11.197f};
+float M12[6] = {13.463f, 10.813f, 13.52f, 13.637f, 13.77f, 13.437f};
+float M15[6] = {16.833f, 13.517f, 16.9f, 17.047f, 17.21f, 16.797f};
+float M17[6] = {19.08f, 15.32f, 19.17f, 19.323f, 19.493f, 19.043f};
+float M20[6] = {22.38f, 18.023f, 22.537f, 22.737f, 22.883f, 22.413f};
+float M22[6] = {24.613f, 19.833f, 24.767f, 25.027f, 25.173f, 24.653f};
+float M25[6] = {27.98f, 22.533f, 28.11f, 28.443f, 28.607f, 28.007f};
+float M27[6] = {30.227f, 24.333f, 30.387f, 30.72f, 30.913f, 30.25f};
+float M30[6] = {33.603f, 27.043f, 33.8f, 34.123f, 34.36f, 33.61f};
+float M32[6] = {35.857f, 28.853f, 36.103f, 36.397f, 36.64f, 35.853f};
+float M35[6] = {39.227f, 31.56f, 39.38f, 39.81f, 40.08f, 39.213f};
+float M37[6] = {41.473f, 33.37f, 41.623f, 42.087f, 42.373f, 41.457f};
 
 //---------------------------------------------------//
 // ピンの設定
@@ -42,7 +53,7 @@ void setup()
 {
   char ch;
   char s[20];
-  tiltCalc(M5, M20);
+  tiltCalc(M2, M5, M7, M10, M12, M15, M17, M20, M22, M25, M27, M30, M32, M35, M37);
   Serial.begin(9600);
   Serial.println("AE_HX711 test");
   for (ch = 0; ch < MAX_CH; ch++)
@@ -50,7 +61,7 @@ void setup()
     AE_HX711_Init(ch);
     AE_HX711_Reset(ch);
     sprintf(s, "calibrating %d", ch);
-    offset[ch] = AE_HX711_getGram(30, ch);
+    offset[ch] = AE_HX711_getGram(10, ch);
   }
 }
 
@@ -223,13 +234,14 @@ float AE_HX711_getGram(char num, char ch)
 }
 
 //原点を通る回帰直線の傾き算出
-float tiltCalc(float *y1, float *y2)
+float tiltCalc(float *M2, float *M5, float *M7, float *M10, float *M12, float *M15, float *M17, float *M20, float *M22, float *M25, float *M27, float *M30, float *M32, float *M35, float *M37)
 {
   float numerator = 0;
   for (int i = 0; i < 6; i++)
   {
     numerator = 0;
-    numerator += 5 * y1[i] + 20 * y2[i];
-    correctionValue[i] = numerator / 425;
+    numerator += 2 * M2[i] + 5 * M5[i] + 7 * M7[i] + 10 * M10[i] + 12 * M12[i] + 15 * M15[i] + 17 * M17[i] + 20 * M20[i] + 22 * M22[i] + 25 * M25[i] + 27 * M27[i] + 30 * M30[i] + 32 * M32[i] + 35 * M35[i] + 37 * M37[i];
+    float denominator = pow(2, 2) + pow(5, 2) + pow(7, 2) + pow(10, 2) + pow(12, 2) + pow(15, 2) + pow(17, 2) + pow(20, 2) + pow(22, 2) + pow(25, 2) + pow(27, 2) + pow(30, 2) + pow(32, 2) + pow(35, 2) + pow(37, 2);
+    correctionValue[i] = numerator / denominator;
   }
 }
